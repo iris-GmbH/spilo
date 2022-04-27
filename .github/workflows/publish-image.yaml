@@ -1,0 +1,42 @@
+name: Build and publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    name: Build docker images and push to repositories
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Setup docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Git Tag
+        id: vars
+        run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
+
+      - name: Build and push image to ghcr
+        uses: docker/build-push-action@v2
+        with:
+          context: ./postgres-appliance
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/iris-gmbh/spilo:${{steps.vars.outputs.tag}}
