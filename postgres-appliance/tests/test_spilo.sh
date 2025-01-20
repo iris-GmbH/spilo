@@ -300,9 +300,7 @@ function test_spilo() {
 
 
     # TEST SUITE 1
-    # wait clone to finish and prevent timescale installation gets cloned
-    find_leader "$upgrade3_container"
-    find_leader "$upgrade_container"
+    find_leader "$upgrade_container" # wait clone to finish and prevent timescale installation gets cloned
     create_timescaledb "$container" # we don't install it at the beginning, as we do 13->17 in a clone
 
     log_info "[TS1] Testing in-place major upgrade 13->14"
